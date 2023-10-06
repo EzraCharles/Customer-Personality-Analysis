@@ -13,12 +13,19 @@ def hello():
 def test_3():
     return "HELLO, this is a CUSTOMER API"
 
-@customer_blueprint.route("/CustomerAnalysis", methods=["GET"])
-def get_customer_analysis():
+@customer_blueprint.route("/CustomerAnalysis/<group>", methods=["GET", "POST"])
+def get_customer_analysis(group):
     obj_job_role = Customer()
-    plot_url = obj_job_role.get_customer_analysis()
+    if int(group) > 3:
+        data = f"{group} is not a valid group" 
+
+        return render_template('analysis.html', data=data)
+    else:
+        group = obj_job_role.get_customer_analysis(group)
+        temp = group.to_dict('records')
+        columnNames = group.columns.values
     
-    return render_template('analysis.html', plot_url=plot_url)
+        return render_template('record.html', records=temp, colnames=columnNames)
 
 @customer_blueprint.route("/Customers", methods=["GET"])
 def get_all_customer():

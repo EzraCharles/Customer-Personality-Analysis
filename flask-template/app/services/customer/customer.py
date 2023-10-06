@@ -29,34 +29,10 @@ class Customer(mongo):
         
         return mongo_dict
         
-    def get_customer_analysis(self):
+    def get_customer_analysis(self, group):
         ENV = dotenv_values("/home/echarles/Documents/DEV/GitHub/Customer-Personality-Analysis/flask-template/app/.env")
-        pickle_file_pca = ENV["PCA"]
-        pickle_file_svm = ENV["SVM"]
-        pickle_file_kmeans = ENV["KMEANS"]
 
         df = self.get_all_customer()
-        # PCA
-        with open(pickle_file_pca,'rb') as file:
-            pickle_pca = pickle.load(file)
-        cols_when_model_builds = pickle_pca.components_
-        df = df[cols_when_model_builds]
-        X_PCA = pickle_pca.transform(df)
+        group = df.loc[(df['labels'] == int(group))]
 
-        # SVM
-        with open(pickle_file_svm,'rb') as file:
-            pickle_svm = pickle.load(file)
-        X_SVM = pickle_svm.predict(X_PCA)
-        df['labels'] = X_SVM
-
-        img = io.StringIO.StringIO()
-        # plt.plot(df["Spent"], df["Income"])
-        fig, ax = plt.subplots(figsize=(5, 5))
-        sns.scatterplot(data=df, x="Spent", y="Income", ax=ax, hue="labels")
-        plt.savefig(img, format='png')
-        plt.close()
-        img.seek(0)
-
-        plot_url = base64.b64encode(img.getvalue())
-
-        return plot_url
+        return group
